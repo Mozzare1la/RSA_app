@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список пользователей</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-users"></i> Список пользователей</h1>
+            <p class="subtitle">Всего зарегистрировано: <strong>{{ count }}</strong> пользователей</p>
+        </div>
+        
+        <div class="card">
+            {% if users %}
+            <div class="table-responsive">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-hashtag"></i> ID</th>
+                            <th><i class="fas fa-user"></i> Логин</th>
+                            <th><i class="fas fa-calendar"></i> Дата регистрации</th>
+                            <th><i class="fas fa-link"></i> Ссылка</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.login }}</td>
+                            <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            <td>
+                                <a href="/api/users/{{ user.id }}" class="btn btn-sm btn-link" target="_blank">
+                                    <i class="fas fa-external-link-alt"></i> API
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-users-slash"></i>
+                <h3>Пользователи не найдены</h3>
+                <p>Зарегистрируйте первого пользователя</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="actions">
+            <a href="/" class="btn btn-primary">
+                <i class="fas fa-user-plus"></i> Добавить пользователя
+            </a>
+            <a href="/api/users" class="btn btn-secondary" target="_blank">
+                <i class="fas fa-code"></i> JSON API
+            </a>
+        </div>
+        
+        <div class="info-card">
+            <h3><i class="fas fa-database"></i> Информация о базе данных</h3>
+            <p>Данные хранятся в SQLite базе данных с использованием SQLAlchemy ORM.</p>
+            <p>Каждый пароль защищен хешированием bcrypt.</p>
+        </div>
+    </div>
+</body>
+</html>

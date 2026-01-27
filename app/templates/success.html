@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация успешна</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="success-message">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h1>✅ ВАШИ ДАННЫЕ СОХРАНЕНЫ</h1>
+            
+            <div class="user-info-card">
+                <h3><i class="fas fa-user"></i> Информация о пользователе</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">Логин:</span>
+                        <span class="value">{{ login }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">ID пользователя:</span>
+                        <span class="value">{{ user_id }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Дата регистрации:</span>
+                        <span class="value">{{ created_at }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="security-info">
+                <h4><i class="fas fa-shield-alt"></i> Безопасность данных</h4>
+                <p>Ваш пароль был зашифрован с использованием алгоритма <strong>bcrypt</strong> и безопасно сохранен в базе данных.</p>
+                <p><i class="fas fa-database"></i> Данные хранятся с использованием <strong>SQLAlchemy ORM</strong>.</p>
+            </div>
+            
+            <div class="actions">
+                <a href="/" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Зарегистрировать нового пользователя
+                </a>
+                
+                <div class="secondary-actions">
+                    <a href="/users" class="btn btn-info">
+                        <i class="fas fa-users"></i> Посмотреть всех пользователей
+                    </a>
+                    <a href="/api/users" class="btn btn-secondary" target="_blank">
+                        <i class="fas fa-code"></i> Посмотреть JSON API
+                    </a>
+                    <a href="/api/health" class="btn btn-success" target="_blank">
+                        <i class="fas fa-heartbeat"></i> Проверить состояние системы
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
