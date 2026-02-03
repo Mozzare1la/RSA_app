@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .dashboard-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .welcome-message {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .user-info {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        
+        .user-info p {
+            margin: 10px 0;
+            color: #555;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #45a049;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .icon {
+            font-size: 50px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="icon">✓</div>
+        
+        {% if message %}
+        <div class="success-message">
+            <h3>{{ message }}</h3>
+        </div>
+        {% endif %}
+        
+        <div class="welcome-message">
+            Добро пожаловать, <strong>{{ login }}</strong>!
+        </div>
+        
+        <div class="user-info">
+            <h3>Вы вошли в аккаунт</h3>
+            <p>Теперь у вас есть доступ к системе</p>
+            <p>Логин: <strong>{{ login }}</strong></p>
+        </div>
+        
+        <div class="actions">
+            <a href="/logout" class="btn btn-secondary">Выйти из аккаунта</a>
+            <a href="/users" class="btn btn-primary">Просмотреть пользователей</a>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <p><a href="/">Вернуться на главную</a></p>
+        </div>
+    </div>
+</body>
+</html>

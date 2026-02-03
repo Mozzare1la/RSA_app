@@ -4,66 +4,136 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Список пользователей</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .stats {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f5f5f5;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #f9f9f9;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #45a049;
+        }
+        
+        .btn-secondary {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #1976D2;
+        }
+        
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-users"></i> Список пользователей</h1>
-            <p class="subtitle">Всего зарегистрировано: <strong>{{ count }}</strong> пользователей</p>
+            <h1>Список пользователей</h1>
+            <div>
+                <a href="/" class="btn btn-secondary">Главная</a>
+                <a href="/login" class="btn btn-primary" style="margin-left: 10px;">Войти</a>
+            </div>
         </div>
         
-        <div class="card">
-            {% if users %}
-            <div class="table-responsive">
-                <table class="users-table">
-                    <thead>
-                        <tr>
-                            <th><i class="fas fa-hashtag"></i> ID</th>
-                            <th><i class="fas fa-user"></i> Логин</th>
-                            <th><i class="fas fa-calendar"></i> Дата регистрации</th>
-                            <th><i class="fas fa-link"></i> Ссылка</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user in users %}
-                        <tr>
-                            <td>{{ user.id }}</td>
-                            <td>{{ user.login }}</td>
-                            <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                            <td>
-                                <a href="/api/users/{{ user.id }}" class="btn btn-sm btn-link" target="_blank">
-                                    <i class="fas fa-external-link-alt"></i> API
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="empty-state">
-                <i class="fas fa-users-slash"></i>
-                <h3>Пользователи не найдены</h3>
-                <p>Зарегистрируйте первого пользователя</p>
-            </div>
-            {% endif %}
+        <div class="stats">
+            <p>Всего зарегистрированных пользователей: <strong>{{ count }}</strong></p>
         </div>
+        
+        {% if users %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Логин</th>
+                    <th>Дата регистрации</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.login }}</td>
+                    <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-message">
+            <p>Пользователи не найдены</p>
+        </div>
+        {% endif %}
         
         <div class="actions">
-            <a href="/" class="btn btn-primary">
-                <i class="fas fa-user-plus"></i> Добавить пользователя
-            </a>
-            <a href="/api/users" class="btn btn-secondary" target="_blank">
-                <i class="fas fa-code"></i> JSON API
-            </a>
-        </div>
-        
-        <div class="info-card">
-            <h3><i class="fas fa-database"></i> Информация о базе данных</h3>
-            <p>Данные хранятся в SQLite базе данных с использованием SQLAlchemy ORM.</p>
-            <p>Каждый пароль защищен хешированием bcrypt.</p>
+            <a href="/" class="btn btn-primary">На главную</a>
+            <a href="/login" class="btn btn-secondary">Войти в систему</a>
         </div>
     </div>
 </body>

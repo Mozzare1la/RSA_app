@@ -4,95 +4,123 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация пользователя</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #45a049;
+        }
+        
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .links a {
+            color: #4CAF50;
+            text-decoration: none;
+            display: block;
+            margin: 10px 0;
+        }
+        
+        .links a:hover {
+            text-decoration: underline;
+        }
+        
+        .notification {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-user-plus"></i> Регистрация пользователя</h1>
-            <p class="subtitle">Используйте SQLAlchemy для работы с базой данных</p>
+            <h1>Регистрация</h1>
+            <p>Создайте новый аккаунт</p>
         </div>
         
-        <div class="card">
-            <form action="/register" method="post" class="auth-form" id="registerForm">
-                <div class="form-group">
-                    <label for="login">
-                        <i class="fas fa-user"></i> Логин:
-                    </label>
-                    <input type="text" id="login" name="login" required class="form-control" 
-                           minlength="3" maxlength="50" 
-                           placeholder="Введите уникальный логин">
-                    <small class="form-text">Минимум 3 символа, максимум 50</small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">
-                        <i class="fas fa-lock"></i> Пароль:
-                    </label>
-                    <input type="password" id="password" name="password" required class="form-control"
-                           minlength="3" placeholder="Введите надежный пароль">
-                    <small class="form-text">Минимум 3 символа. Пароль будет зашифрован</small>
-                </div>
-                
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-user-plus"></i> Зарегистрировать
-                    </button>
-                </div>
-            </form>
-        </div>
-        
-        <div class="info-card">
-            <h3><i class="fas fa-info-circle"></i> О технологии</h3>
-            <p>Это приложение использует:</p>
-            <ul>
-                <li><strong>SQLAlchemy</strong> - ORM для работы с базой данных</li>
-                <li><strong>FastAPI</strong> - современный веб-фреймворк</li>
-                <li><strong>bcrypt</strong> - безопасное хеширование паролей</li>
-                <li><strong>SQLite</strong> - встроенная база данных</li>
-            </ul>
-        </div>
+        <form method="POST" action="/register">
+            <div class="form-group">
+                <label for="login">Логин:</label>
+                <input type="text" id="login" name="login" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="btn">Зарегистрироваться</button>
+        </form>
         
         <div class="links">
-            <a href="/users" class="btn btn-info">
-                <i class="fas fa-users"></i> Все пользователи
-            </a>
-            <a href="/api/users" class="btn btn-secondary" target="_blank">
-                <i class="fas fa-code"></i> API JSON
-            </a>
-            <a href="/api/health" class="btn btn-success" target="_blank">
-                <i class="fas fa-heartbeat"></i> Проверить здоровье
-            </a>
-            <a href="/api/info" class="btn btn-warning" target="_blank">
-                <i class="fas fa-info"></i> О приложении
-            </a>
-        </div>
-        
-        <div class="stats">
-            <p><i class="fas fa-database"></i> База данных: <strong>SQLite + SQLAlchemy</strong></p>
+            <p>Уже есть аккаунт? <a href="/login">Войти</a></p>
+            <p><a href="/users">Просмотреть всех пользователей</a></p>
         </div>
     </div>
-    
-    <script>
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            const login = document.getElementById('login').value.trim();
-            const password = document.getElementById('password').value;
-            
-            if (login.length < 3) {
-                e.preventDefault();
-                alert('Логин должен содержать минимум 3 символа');
-                return false;
-            }
-            
-            if (password.length < 3) {
-                e.preventDefault();
-                alert('Пароль должен содержать минимум 3 символа');
-                return false;
-            }
-            
-            return true;
-        });
-    </script>
 </body>
 </html>

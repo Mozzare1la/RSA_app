@@ -1,10 +1,11 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 import logging
+import os
 
 from database import get_db, engine, Base
 import crud
@@ -35,14 +36,55 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Настройка шаблонов и статических файлов
-templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Получаем абсолютный путь к директории со static файлами
+current_dir = os.path.dirname(os.path.abspath(__file__))
+static_dir = os.path.join(current_dir, "static")
+templates_dir = os.path.join(current_dir, "templates")
+
+# Проверяем существование директорий
+logger.info(f"📁 Текущая директория: {current_dir}")
+logger.info(f"📁 Директория static: {static_dir}")
+logger.info(f"📁 Директория templates: {templates_dir}")
+
+if not os.path.exists(static_dir):
+    logger.warning(f"⚠️ Директория static не найдена: {static_dir}")
+    os.makedirs(static_dir, exist_ok=True)
+    logger.info(f"✅ Создана директория static: {static_dir}")
+
+if not os.path.exists(templates_dir):
+    logger.warning(f"⚠️ Директория templates не найдена: {templates_dir}")
+    os.makedirs(templates_dir, exist_ok=True)
+    logger.info(f"✅ Создана директория templates: {templates_dir}")
+
+# Настройка шаблонов и статических файлов с абсолютными путями
+templates = Jinja2Templates(directory=templates_dir)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Главная страница с формой
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+# Страница входа
+@app.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+# Страница успешного входа
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard_page(
+    request: Request, 
+    login: str = None,
+    message: str = None
+):
+    return templates.TemplateResponse(
+        "dashboard.html", 
+        {
+            "request": request,
+            "login": login,
+            "message": message
+        }
+    )
 
 # Обработка формы регистрации
 @app.post("/register", response_class=HTMLResponse)
@@ -104,6 +146,60 @@ async def register_user(
             }
         )
 
+# Обработка формы входа
+@app.post("/login", response_class=HTMLResponse)
+async def login_user_form(
+    request: Request,
+    login: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    try:
+        # Аутентифицируем пользователя
+        user = crud.authenticate_user(db, login, password)
+        if not user:
+            raise HTTPException(status_code=401, detail="Неверный логин или пароль")
+        
+        logger.info(f"✅ Пользователь '{login}' успешно вошел в систему")
+        
+        # Перенаправляем на dashboard с параметром логина
+        return RedirectResponse(
+            url=f"/dashboard?login={login}&message=Вы успешно вошли в систему", 
+            status_code=303
+        )
+        
+    except HTTPException as e:
+        logger.warning(f"⚠️ Ошибка входа: {e.detail}")
+        return templates.TemplateResponse(
+            "login.html",
+            {
+                "request": request,
+                "error_message": e.detail,
+                "login": login
+            }
+        )
+    except Exception as e:
+        logger.error(f"❌ Неожиданная ошибка: {e}")
+        return templates.TemplateResponse(
+            "login.html",
+            {
+                "request": request,
+                "error_message": f"Произошла ошибка: {str(e)}",
+                "login": login
+            }
+        )
+
+# Выход из системы
+@app.get("/logout", response_class=HTMLResponse)
+async def logout_user(request: Request):
+    return templates.TemplateResponse(
+        "logout.html",
+        {
+            "request": request,
+            "message": "Вы успешно вышли из системы"
+        }
+    )
+
 # API: Получить всех пользователей
 @app.get("/api/users", response_model=schemas.UserList)
 async def get_all_users(
@@ -151,9 +247,9 @@ async def view_users_page(
         }
     )
 
-# Проверка аутентификации
+# API для аутентификации (JSON)
 @app.post("/api/auth/login")
-async def login_user(
+async def login_user_api(
     login: str = Form(...),
     password: str = Form(...),
     db: Session = Depends(get_db)
@@ -210,7 +306,7 @@ async def app_info():
             "Веб-интерфейс на HTML/Jinja2"
         ],
         "endpoints": {
-            "web": ["/", "/users"],
+            "web": ["/", "/login", "/dashboard", "/logout", "/users"],
             "api": ["/api/users", "/api/users/{id}", "/api/auth/login", "/api/health", "/api/info"]
         }
     }

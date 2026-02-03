@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выход из системы</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .logout-container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .logout-message {
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .icon {
+            font-size: 50px;
+            color: #2196F3;
+            margin-bottom: 20px;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        
+        .btn-primary {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1976D2;
+        }
+        
+        .btn-secondary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="logout-container">
+        <div class="icon">👋</div>
+        
+        <div class="logout-message">
+            <h3>{{ message }}</h3>
+            <p>Вы были успешно выведены из системы</p>
+        </div>
+        
+        <p>Вы можете:</p>
+        
+        <div class="actions">
+            <a href="/login" class="btn btn-primary">Войти снова</a>
+            <a href="/" class="btn btn-secondary">Зарегистрироваться</a>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <p><a href="/users">Просмотреть всех пользователей</a></p>
+        </div>
+    </div>
+</body>
+</html>
