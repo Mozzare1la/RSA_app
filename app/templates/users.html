@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Список пользователей</title>
+    <title>Все пользователи</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
         .container {
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 30px;
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
             background: white;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         
         .header {
@@ -20,90 +20,121 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
         }
         
         .stats {
-            background: #e8f5e9;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
         }
         
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
         }
         
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         }
         
-        th {
-            background: #f5f5f5;
-            font-weight: 600;
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2c3e50;
         }
         
-        tr:hover {
-            background: #f9f9f9;
-        }
-        
-        .actions {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 30px;
+        .stat-card .label {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-top: 5px;
         }
         
         .btn {
-            padding: 12px 30px;
+            padding: 10px 20px;
             border: none;
             border-radius: 5px;
-            font-size: 16px;
             cursor: pointer;
             text-decoration: none;
-            transition: background 0.3s;
+            display: inline-block;
+            margin: 5px;
         }
         
         .btn-primary {
-            background: #4CAF50;
+            background: #3498db;
             color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #45a049;
         }
         
         .btn-secondary {
-            background: #2196F3;
+            background: #95a5a6;
             color: white;
         }
         
-        .btn-secondary:hover {
-            background: #1976D2;
+        .role-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
         }
         
-        .empty-message {
-            text-align: center;
-            padding: 40px;
-            color: #666;
+        .role-admin {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .role-user {
+            background: #3498db;
+            color: white;
+        }
+        
+        .status-active {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .status-inactive {
+            color: #e74c3c;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Список пользователей</h1>
+            <h1>👥 Все пользователи системы</h1>
             <div>
-                <a href="/" class="btn btn-secondary">Главная</a>
-                <a href="/login" class="btn btn-primary" style="margin-left: 10px;">Войти</a>
+                <a href="/" class="btn btn-secondary">🏠 На главную</a>
+                <a href="/login" class="btn btn-primary">🔑 Войти</a>
             </div>
         </div>
         
         <div class="stats">
-            <p>Всего зарегистрированных пользователей: <strong>{{ count }}</strong></p>
+            <h3>Статистика системы</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="value">{{ count }}</div>
+                    <div class="label">Всего пользователей</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value">{{ users|selectattr('role', 'equalto', 'admin')|list|length }}</div>
+                    <div class="label">Администраторов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value">{{ users|selectattr('is_active', 'equalto', true)|list|length }}</div>
+                    <div class="label">Активных</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value">{{ users|selectattr('is_active', 'equalto', false)|list|length }}</div>
+                    <div class="label">Неактивных</div>
+                </div>
+            </div>
         </div>
         
         {% if users %}
@@ -112,28 +143,56 @@
                 <tr>
                     <th>ID</th>
                     <th>Логин</th>
+                    <th>Роль</th>
+                    <th>Статус</th>
                     <th>Дата регистрации</th>
+                    <th>Последний вход</th>
                 </tr>
             </thead>
             <tbody>
                 {% for user in users %}
                 <tr>
                     <td>{{ user.id }}</td>
-                    <td>{{ user.login }}</td>
-                    <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td><strong>{{ user.login }}</strong></td>
+                    <td>
+                        <span class="role-badge role-{{ user.role }}">
+                            {{ "Админ" if user.role == "admin" else "Пользователь" }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-{{ "active" if user.is_active else "inactive" }}">
+                            {{ "Активен" if user.is_active else "Неактивен" }}
+                        </span>
+                    </td>
+                    <td>{{ user.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                    <td>
+                        {% if user.last_login %}
+                            {{ user.last_login.strftime('%d.%m.%Y %H:%M') }}
+                        {% else %}
+                            Никогда
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
         {% else %}
-        <div class="empty-message">
-            <p>Пользователи не найдены</p>
+        <div style="text-align: center; padding: 60px 20px;">
+            <h2>😔 Пользователи не найдены</h2>
+            <p>В системе пока нет зарегистрированных пользователей</p>
+            <a href="/register" class="btn btn-primary" style="margin-top: 20px;">
+                📝 Зарегистрировать первого пользователя
+            </a>
         </div>
         {% endif %}
         
-        <div class="actions">
-            <a href="/" class="btn btn-primary">На главную</a>
-            <a href="/login" class="btn btn-secondary">Войти в систему</a>
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
+            <p>Показано {{ users|length }} пользователей из {{ count }}</p>
+            <p>
+                <a href="/">Главная</a> | 
+                <a href="/register">Регистрация</a> | 
+                <a href="/login">Вход</a>
+            </p>
         </div>
     </div>
 </body>

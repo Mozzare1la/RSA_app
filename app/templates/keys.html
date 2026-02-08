@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление ключами - RSA система</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #219653;
+        }
+        
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        
+        .keys-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .key-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #3498db;
+        }
+        
+        .key-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .key-id {
+            background: #3498db;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .key-date {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .key-section {
+            margin-bottom: 20px;
+        }
+        
+        .key-label {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .key-value {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            font-size: 14px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .copy-btn {
+            background: none;
+            border: none;
+            color: #3498db;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        .copy-btn:hover {
+            color: #2980b9;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+        
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            position: relative;
+        }
+        
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+        
+        .close:hover {
+            color: #2c3e50;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔑 Управление RSA ключами</h1>
+            <div>
+                <span style="color: #7f8c8d;">Пользователь: <strong>{{ user.login }}</strong></span>
+                <a href="/dashboard?login={{ user.login }}" class="btn btn-secondary" style="margin-left: 15px;">← Назад</a>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button onclick="generateKeys()" class="btn btn-primary">
+                🚀 Сгенерировать новые ключи
+            </button>
+            <button onclick="importKeys()" class="btn btn-success">
+                📥 Импортировать ключи
+            </button>
+            <a href="/encrypt?login={{ user.login }}" class="btn">
+                🔒 Перейти к шифрованию
+            </a>
+        </div>
+        
+        {% if keys %}
+        <h2>Ваши ключи ({{ keys|length }})</h2>
+        <div class="keys-grid">
+            {% for key in keys %}
+            <div class="key-card">
+                <div class="key-header">
+                    <div class="key-id">Ключ #{{ key.id }}</div>
+                    <div class="key-date">{{ key.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+                </div>
+                
+                <div class="key-section">
+                    <div class="key-label">🔑 Публичный ключ (e, n)</div>
+                    <div class="key-value" id="pub-key-{{ key.id }}">
+                        {{ key.public_key }}
+                        <button onclick="copyToClipboard('pub-key-{{ key.id }}')" class="copy-btn">📋</button>
+                    </div>
+                </div>
+                
+                <div class="key-section">
+                    <div class="key-label">🔒 Приватный ключ (d, n)</div>
+                    <div class="key-value" id="priv-key-{{ key.id }}">
+                        {{ key.private_key }}
+                        <button onclick="copyToClipboard('priv-key-{{ key.id }}')" class="copy-btn">📋</button>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button onclick="useKeyForEncrypt({{key.id}})" class="btn btn-primary" style="flex: 1;">
+                        🔒 Использовать для шифрования
+                    </button>
+                    <button onclick="deleteKey({{key.id}})" class="btn btn-danger">
+                        🗑️ Удалить
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🔑</div>
+            <h2>У вас еще нет ключей</h2>
+            <p>Сгенерируйте первую пару RSA ключей для начала работы</p>
+            <button onclick="generateKeys()" class="btn btn-primary" style="margin-top: 20px;">
+                🚀 Сгенерировать ключи
+            </button>
+        </div>
+        {% endif %}
+        
+        <!-- Модальное окно для генерации -->
+        <div id="generateModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('generateModal')">&times;</span>
+                <h2>Генерация RSA ключей</h2>
+                <p>Сейчас будут сгенерированы новые RSA ключи. Это может занять несколько секунд.</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <div id="loadingSpinner" style="display: none;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">⏳</div>
+                        <p>Генерирую ключи...</p>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px;">
+                    <button onclick="closeModal('generateModal')" class="btn btn-secondary">Отмена</button>
+                    <button onclick="confirmGenerate()" class="btn btn-primary">Генерировать</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function generateKeys() {
+            document.getElementById('generateModal').style.display = 'block';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        function confirmGenerate() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+            
+            const formData = new FormData();
+            formData.append('login', '{{ user.login }}');
+            
+            fetch('/api/rsa/generate', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ Ключи успешно сгенерированы!');
+                    window.location.reload();
+                } else {
+                    alert('❌ Ошибка: ' + data.detail);
+                    closeModal('generateModal');
+                }
+            })
+            .catch(error => {
+                alert('❌ Ошибка при генерации ключей: ' + error);
+                closeModal('generateModal');
+            });
+        }
+        
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent.replace('📋', '').trim();
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Ключ скопирован в буфер обмена!');
+            }).catch(err => {
+                alert('❌ Ошибка копирования: ' + err);
+            });
+        }
+        
+        function useKeyForEncrypt(keyId) {
+            window.location.href = `/encrypt?login={{ user.login }}&key_id=${keyId}`;
+        }
+        
+        function deleteKey(keyId) {
+            if (confirm('Вы уверены, что хотите удалить этот ключ? Это действие нельзя отменить.')) {
+                // Здесь можно добавить удаление ключа
+                alert('Функция удаления ключей в разработке...');
+            }
+        }
+        
+        function importKeys() {
+            alert('Функция импорта ключей в разработке...');
+        }
+    </script>
+</body>
+</html>

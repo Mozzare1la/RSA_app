@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация - RSA система</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .auth-container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .auth-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .auth-header p {
+            color: #7f8c8d;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            text-align: center;
+            text-decoration: none;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .auth-links {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .auth-links a {
+            color: #3498db;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        
+        .auth-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            border-left: 5px solid #dc3545;
+        }
+        
+        .password-strength {
+            margin-top: 8px;
+            height: 4px;
+            background: #eee;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s, background 0.3s;
+        }
+        
+        .strength-weak { background: #e74c3c; width: 25%; }
+        .strength-medium { background: #f39c12; width: 50%; }
+        .strength-good { background: #f1c40f; width: 75%; }
+        .strength-strong { background: #27ae60; width: 100%; }
+        
+        .password-hint {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1>🔐 Регистрация</h1>
+            <p>Создайте аккаунт для доступа к RSA системе</p>
+        </div>
+        
+        {% if error_message %}
+        <div class="error-message">
+            {{ error_message }}
+        </div>
+        {% endif %}
+        
+        <form method="POST" action="/register">
+            <div class="form-group">
+                <label for="login">Логин:</label>
+                <input type="text" id="login" name="login" value="{{ login or '' }}" required placeholder="Введите логин">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" required placeholder="Введите пароль" onkeyup="checkPasswordStrength()">
+                <div class="password-strength">
+                    <div class="strength-bar" id="strengthBar"></div>
+                </div>
+                <div class="password-hint">Пароль должен содержать минимум 3 символа</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="role">Роль:</label>
+                <select id="role" name="role">
+                    <option value="user">Пользователь</option>
+                    <option value="admin">Администратор</option>
+                </select>
+                <div class="password-hint">Выберите "Администратор" только если вы уверены</div>
+            </div>
+            
+            <button type="submit" class="btn">Зарегистрироваться</button>
+            
+            <a href="/login" class="btn btn-secondary">Уже есть аккаунт? Войти</a>
+        </form>
+        
+        <div class="auth-links">
+            <p>
+                <a href="/">На главную</a> | 
+                <a href="/users">Все пользователи</a> | 
+                <a href="/about">О системе</a>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const strengthBar = document.getElementById('strengthBar');
+            
+            // Сбрасываем
+            strengthBar.className = 'strength-bar';
+            
+            if (password.length === 0) {
+                return;
+            }
+            
+            // Простая проверка сложности
+            let strength = 0;
+            
+            if (password.length >= 3) strength += 25;
+            if (password.length >= 6) strength += 25;
+            if (/[A-Z]/.test(password)) strength += 25;
+            if (/[0-9]/.test(password)) strength += 25;
+            
+            // Устанавливаем класс в зависимости от силы
+            if (strength <= 25) {
+                strengthBar.className = 'strength-bar strength-weak';
+            } else if (strength <= 50) {
+                strengthBar.className = 'strength-bar strength-medium';
+            } else if (strength <= 75) {
+                strengthBar.className = 'strength-bar strength-good';
+            } else {
+                strengthBar.className = 'strength-bar strength-strong';
+            }
+        }
+    </script>
+</body>
+</html>
