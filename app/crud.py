@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-import models
-import schemas
+import models.models as models
+import schemas.schemas as schemas
 from datetime import datetime
 from typing import List, Optional
+from app.logic import verify_password
 
 # Инициализация для хеширования паролей
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -39,25 +40,6 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.refresh(db_user)
     
     return db_user
-
-def verify_password(plain_password: str, hashed_password: str):
-    """Проверить пароль"""
-    return pwd_context.verify(plain_password, hashed_password)
-
-def authenticate_user(db: Session, login: str, password: str):
-    """Аутентификация пользователя"""
-    user = get_user_by_login(db, login)
-    if not user:
-        return False
-    if not verify_password(password, user.password_hash):
-        return False
-    
-    # Обновляем время последнего входа
-    user.last_login = datetime.now()
-    db.commit()
-    db.refresh(user)
-    
-    return user
 
 def get_users_count(db: Session):
     """Получить количество пользователей"""

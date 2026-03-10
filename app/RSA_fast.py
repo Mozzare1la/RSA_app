@@ -1,6 +1,6 @@
 import random
 
-
+# определяем простоту числа
 def is_prime_fast(min, max):
 
     prime = False
@@ -18,6 +18,7 @@ def is_prime_fast(min, max):
             return n
 
 
+# генерируем ключи
 def RSA_key_gen_fast():
 
     p = is_prime_fast(1000, 9999)
@@ -40,6 +41,7 @@ def RSA_key_gen_fast():
     return (pub_key, priv_key)
 
 
+# шифрование
 def RSA_encrypt_fast(text, pub_key):
 
     print("fast")
@@ -56,6 +58,7 @@ def RSA_encrypt_fast(text, pub_key):
     return cipher
 
 
+# расшифрование
 def RSA_decrypt_fast(cipher, priv_key):
 
     print("fast")
