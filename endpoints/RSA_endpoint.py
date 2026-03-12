@@ -6,7 +6,7 @@ import app.crud as crud
 import logging
 from app import RSA_fast
 import json
-from app.logic import get_client_ip
+from app.logic import get_client_ip, get_current_user_from_token
 
 router = APIRouter(prefix="/RSA", tags=["RSA"])
 
@@ -17,9 +17,8 @@ logger = logging.getLogger(__name__)
 # Страница генерации ключей
 @router.post("/api/generate")
 async def generate_rsa_keys(
-    request: Request, login: str = Form(...), db: Session = Depends(get_db)
+    request: Request, user = Depends(get_current_user_from_token), db: Session = Depends(get_db)
 ):
-    user = crud.get_user_by_login(db, login)
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
@@ -54,12 +53,11 @@ async def generate_rsa_keys(
 @router.post("/api/encrypt")
 async def rsa_encrypt(
     request: Request,
-    login: str = Form(...),
+     user = Depends(get_current_user_from_token),
     text: str = Form(...),
     key_id: int = Form(None),
     db: Session = Depends(get_db),
 ):
-    user = crud.get_user_by_login(db, login)
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
@@ -103,12 +101,11 @@ async def rsa_encrypt(
 @router.post("/api/decrypt")
 async def rsa_decrypt(
     request: Request,
-    login: str = Form(...),
+    user = Depends(get_current_user_from_token),
     cipher: str = Form(...),
     key_id: int = Form(...),
     db: Session = Depends(get_db),
 ):
-    user = crud.get_user_by_login(db, login)
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
@@ -151,13 +148,9 @@ async def rsa_decrypt(
 # История операций
 @router.get("/history")
 async def history_page(
-    request: Request, login: str = None, db: Session = Depends(get_db)
+    request: Request, user = Depends(get_current_user_from_token), db: Session = Depends(get_db)
 ):
-    if not login:
-        return RedirectResponse(url="/login", status_code=303)
-
-    user = crud.get_user_by_login(db, login)
-    if not user:
+    if user == None:
         return RedirectResponse(url="/login", status_code=303)
 
     # Получаем операции пользователя

@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Depends
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
@@ -85,6 +85,34 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 app.include_router(admin_router)
 app.include_router(rsa_router)
 app.include_router(user_router)
+
+# ========== Проверка наличия токена ==========
+
+@app.middleware("http")
+async def auth_middleware(request: Request, call_next):
+    # Пропускаем публичные маршруты
+    public_paths = ["/", "/about", "/help", "/user/login", "/user/register", "/static", "api/health", "api/info"]
+    
+    if any(request.url.path.startswith(path) for path in public_paths):
+        return await call_next(request)
+    
+    # Для защищенных маршрутов проверяем наличие токена
+    try:
+        token = request.cookies.get("access_token")
+        if token and token.startswith("Bearer "):
+            token = token.replace("Bearer ", "")
+            request.state.token = token
+        elif token == None:
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Не авторизован"},
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+    except:
+        pass
+    
+    response = await call_next(request)
+    return response
 
 # ========== Вспомогательные страницы ==========
 
