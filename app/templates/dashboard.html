@@ -1,0 +1,213 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Личный кабинет - RSA Криптосистема{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <!-- Приветствие -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="h4 mb-0">
+                    <i class="bi bi-person-circle me-2"></i>
+                    Личный кабинет
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3 class="h5">Информация о пользователе</h3>
+                        <p><strong>Логин:</strong> <span id="userLogin"></span></p>
+                        <p><strong>Роль:</strong> <span id="userRole"></span></p>
+                        <p><strong>ID пользователя:</strong> <span id="userId"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h3 class="h5">Быстрые действия</h3>
+                        <div class="d-grid gap-2">
+                            <a href="/keys" class="btn btn-outline-primary">
+                                <i class="bi bi-key me-2"></i>Сгенерировать ключи
+                            </a>
+                            <a href="/encrypt" class="btn btn-outline-success">
+                                <i class="bi bi-lock me-2"></i>Зашифровать текст
+                            </a>
+                            <a href="/decrypt" class="btn btn-outline-danger">
+                                <i class="bi bi-unlock me-2"></i>Расшифровать текст
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Статистика -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="display-4" id="keysCount">0</h3>
+                        <p class="text-muted mb-0">Ключей сгенерировано</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="display-4" id="encryptCount">0</h3>
+                        <p class="text-muted mb-0">Операций шифрования</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="display-4" id="decryptCount">0</h3>
+                        <p class="text-muted mb-0">Операций расшифрования</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Последние операции -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="h5 mb-0">
+                    <i class="bi bi-clock-history me-2"></i>
+                    Последние операции
+                </h3>
+                <a href="/history" class="btn btn-sm btn-outline-primary">Все операции</a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Тип</th>
+                                <th>Дата</th>
+                                <th>Детали</th>
+                            </tr>
+                        </thead>
+                        <tbody id="operationsTableBody">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    Нет операций
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Последние действия -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="h5 mb-0">
+                    <i class="bi bi-activity me-2"></i>
+                    Последние действия
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="list-group" id="activitiesList">
+                    <div class="list-group-item text-center text-muted">
+                        Нет активности
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function loadDashboardData() {
+    try {
+        const response = await fetch('/user/dashboard');
+        if (response.ok) {
+            const data = await response.json();
+            
+            // Обновляем информацию о пользователе
+            document.getElementById('userLogin').textContent = data.user.login;
+            document.getElementById('userRole').textContent = data.user.role === 'admin' ? 'Администратор' : 'Пользователь';
+            document.getElementById('userId').textContent = data.user.id;
+            
+            // Здесь нужно загрузить реальную статистику с сервера
+            // Пока установим демо-данные
+            document.getElementById('keysCount').textContent = '5';
+            document.getElementById('encryptCount').textContent = '12';
+            document.getElementById('decryptCount').textContent = '8';
+            
+            // Загружаем последние операции
+            loadRecentOperations();
+            
+            // Загружаем последние действия
+            loadRecentActivities();
+        }
+    } catch (error) {
+        console.error('Dashboard load error:', error);
+    }
+}
+
+async function loadRecentOperations() {
+    try {
+        const response = await fetch('/RSA/history');
+        if (response.ok) {
+            const data = await response.json();
+            const operations = data.operations || [];
+            
+            const tbody = document.getElementById('operationsTableBody');
+            if (operations.length > 0) {
+                tbody.innerHTML = operations.slice(0, 5).map(op => `
+                    <tr>
+                        <td>${op.id}</td>
+                        <td>
+                            <span class="badge ${op.operation_type === 'encrypt' ? 'bg-success' : 'bg-danger'}">
+                                ${op.operation_type === 'encrypt' ? 'Шифрование' : 'Расшифрование'}
+                            </span>
+                        </td>
+                        <td>${new Date(op.created_at).toLocaleString()}</td>
+                        <td>Длина: ${op.input_text?.length || 0} символов</td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Нет операций</td></tr>';
+            }
+        }
+    } catch (error) {
+        console.error('Load operations error:', error);
+    }
+}
+
+async function loadRecentActivities() {
+    try {
+        const response = await fetch('/admin/activity'); // Только для админа
+        if (response.ok) {
+            const data = await response.json();
+            const activities = data.activities || [];
+            
+            const activitiesList = document.getElementById('activitiesList');
+            if (activities.length > 0) {
+                activitiesList.innerHTML = activities.slice(0, 5).map(act => `
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-info me-2">${act.activity_type}</span>
+                                <span>${act.details || ''}</span>
+                            </div>
+                            <small class="text-muted">${new Date(act.created_at).toLocaleString()}</small>
+                        </div>
+                        <small class="text-muted">IP: ${act.ip_address || 'Неизвестно'}</small>
+                    </div>
+                `).join('');
+            }
+        }
+    } catch (error) {
+        // Если пользователь не админ, показываем сообщение
+        const activitiesList = document.getElementById('activitiesList');
+        activitiesList.innerHTML = '<div class="list-group-item text-center text-muted">История активности доступна только администраторам</div>';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadDashboardData);
+</script>
+{% endblock %}

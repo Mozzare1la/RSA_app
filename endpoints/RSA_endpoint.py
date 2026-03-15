@@ -1,12 +1,19 @@
 from fastapi import APIRouter, Depends, Request, HTTPException, Form
 from sqlalchemy.orm import Session
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
+from fastapi.templating import Jinja2Templates
 from app.database import get_db
 import app.crud as crud
 import logging
 from app import RSA_fast
 import json
 from app.logic import get_client_ip, get_current_user_from_token
+import os
+
+# Настройка шаблонов
+current_dir = os.path.dirname(os.path.abspath(__file__))
+templates_dir = os.path.join(os.path.dirname(current_dir), "templates")
+templates = Jinja2Templates(directory=templates_dir)
 
 router = APIRouter(prefix="/RSA", tags=["RSA"])
 
@@ -15,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 # Страница генерации ключей
-@router.post("/api/generate")
+@router.get("/keys", response_class=HTMLResponse)
 async def generate_rsa_keys(
     request: Request, user = Depends(get_current_user_from_token), db: Session = Depends(get_db)
 ):
@@ -40,7 +47,14 @@ async def generate_rsa_keys(
             get_client_ip(request),
         )
  
-        return keypair.id, pub_key, priv_key
+        return templates.TemplateResponse(
+            "keys.html", 
+            {
+                "request": request, 
+                "user": user,
+                "keys": [pub_key, priv_key]
+            }
+        )
 
     except Exception as e:
         logger.error(f"❌ Ошибка генерации ключей: {e}")

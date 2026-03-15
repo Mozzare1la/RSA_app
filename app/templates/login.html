@@ -1,0 +1,102 @@
+<!-- templates/login.html -->
+{% extends "base.html" %}
+
+{% block title %}Вход - RSA Криптосистема{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 col-lg-5 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="h4 mb-0">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                    Вход в систему
+                </h2>
+            </div>
+            <div class="card-body p-4">
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="login" class="form-label">Логин</label>
+                        <input type="text" class="form-control" id="login" name="login" required 
+                               placeholder="Введите ваш логин">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Пароль</label>
+                        <input type="password" class="form-control" id="password" name="password" required 
+                               placeholder="Введите ваш пароль">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="remember">
+                        <label class="form-check-label" for="remember">Запомнить меня</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" id="submitBtn">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        <span class="btn-text">Войти</span>
+                    </button>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="mb-2">Нет аккаунта? <a href="/register">Зарегистрироваться</a></p>
+                    <p class="mb-0">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Тестовые учетные записи: admin/admin123, user/user123
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const spinner = submitBtn.querySelector('.spinner-border');
+    const btnText = submitBtn.querySelector('.btn-text');
+    
+    // Показываем загрузку
+    spinner.classList.remove('d-none');
+    btnText.textContent = 'Вход...';
+    submitBtn.disabled = true;
+    
+    const loginData = {
+        login: document.getElementById('login').value,
+        password: document.getElementById('password').value
+    };
+    
+    try {
+        const response = await fetch('/user/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(loginData)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showAlert('Успешный вход! Перенаправление...', 'success');
+            setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 1000);
+        } else {
+            showAlert(data.detail || 'Ошибка входа', 'danger');
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        showAlert('Ошибка соединения с сервером', 'danger');
+    } finally {
+        // Скрываем загрузку
+        spinner.classList.add('d-none');
+        btnText.textContent = 'Войти';
+        submitBtn.disabled = false;
+    }
+});
+</script>
+{% endblock %}

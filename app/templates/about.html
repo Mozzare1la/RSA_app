@@ -1,0 +1,107 @@
+<!-- templates/about.html -->
+{% extends "base.html" %}
+
+{% block title %}О нас - RSA Криптосистема{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="h4 mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    О проекте
+                </h2>
+            </div>
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <i class="bi bi-shield-lock-fill" style="font-size: 5rem; color: var(--primary-color);"></i>
+                    <h3 class="mt-3">RSA Криптосистема</h3>
+                    <p class="text-muted">Версия 2.0.0</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="h5">О системе</h4>
+                    <p>
+                        RSA Криптосистема - это веб-приложение для шифрования и расшифрования данных 
+                        с использованием криптографического алгоритма RSA. Система предоставляет 
+                        удобный интерфейс для генерации ключей, шифрования текста и управления 
+                        криптографическими операциями.
+                    </p>
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="h5">Особенности</h4>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item bg-transparent">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Быстрая генерация RSA ключей
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Шифрование и расшифрование текста
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            История всех операций
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Административная панель
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Безопасное хранение ключей
+                        </li>
+                        <li class="list-group-item bg-transparent">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Отслеживание активности пользователей
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="h5">Технологии</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Бэкенд</h5>
+                                    <ul class="list-unstyled">
+                                        <li>FastAPI</li>
+                                        <li>SQLAlchemy</li>
+                                        <li>Python 3.9+</li>
+                                        <li>JWT аутентификация</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">Фронтенд</h5>
+                                    <ul class="list-unstyled">
+                                        <li>HTML5/CSS3</li>
+                                        <li>Bootstrap 5</li>
+                                        <li>JavaScript</li>
+                                        <li>Jinja2 шаблоны</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="h5">Контакты</h4>
+                    <p>
+                        <i class="bi bi-envelope me-2"></i> support@rsacrypto.ru<br>
+                        <i class="bi bi-github me-2"></i> github.com/rsacrypto<br>
+                        <i class="bi bi-telegram me-2"></i> @rsacrypto_support
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

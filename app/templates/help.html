@@ -1,0 +1,137 @@
+<!-- templates/help.html -->
+{% extends "base.html" %}
+
+{% block title %}Помощь - RSA Криптосистема{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="h4 mb-0">
+                    <i class="bi bi-question-circle me-2"></i>
+                    Центр помощи
+                </h2>
+            </div>
+            <div class="card-body p-4">
+                <div class="accordion" id="helpAccordion">
+                    <!-- Вопрос 1 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1">
+                                Как сгенерировать RSA ключи?
+                            </button>
+                        </h2>
+                        <div id="collapse1" class="accordion-collapse collapse show" data-bs-parent="#helpAccordion">
+                            <div class="accordion-body">
+                                <ol>
+                                    <li>Авторизуйтесь в системе</li>
+                                    <li>Перейдите в раздел "Ключи"</li>
+                                    <li>Нажмите кнопку "Сгенерировать новую пару ключей"</li>
+                                    <li>Дождитесь завершения генерации</li>
+                                    <li>Обязательно сохраните приватный ключ в надежном месте!</li>
+                                </ol>
+                                <p class="alert alert-warning mt-2">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    Приватный ключ не хранится на сервере. При его утере восстановить данные будет невозможно.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Вопрос 2 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2">
+                                Как зашифровать текст?
+                            </button>
+                        </h2>
+                        <div id="collapse2" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                            <div class="accordion-body">
+                                <ol>
+                                    <li>Перейдите в раздел "Шифрование"</li>
+                                    <li>Введите текст для шифрования</li>
+                                    <li>Выберите существующий публичный ключ или используйте временный</li>
+                                    <li>Нажмите "Зашифровать"</li>
+                                    <li>Скопируйте полученный зашифрованный текст</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Вопрос 3 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3">
+                                Как расшифровать текст?
+                            </button>
+                        </h2>
+                        <div id="collapse3" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                            <div class="accordion-body">
+                                <ol>
+                                    <li>Перейдите в раздел "Расшифрование"</li>
+                                    <li>Вставьте зашифрованный текст в формате JSON</li>
+                                    <li>Выберите соответствующий приватный ключ</li>
+                                    <li>Нажмите "Расшифровать"</li>
+                                    <li>Получите исходный текст</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Вопрос 4 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4">
+                                Где найти историю операций?
+                            </button>
+                        </h2>
+                        <div id="collapse4" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                            <div class="accordion-body">
+                                <p>История всех ваших операций доступна в разделе "История". Там вы можете:</p>
+                                <ul>
+                                    <li>Просмотреть все выполненные операции</li>
+                                    <li>Отфильтровать по типу (шифрование/расшифрование)</li>
+                                    <li>Посмотреть детали каждой операции</li>
+                                    <li>Скопировать результаты операций</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Вопрос 5 -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse5">
+                                Что делать, если я потерял приватный ключ?
+                            </button>
+                        </h2>
+                        <div id="collapse5" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                            <div class="accordion-body">
+                                <div class="alert alert-danger">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    <strong>Внимание!</strong> Приватный ключ не может быть восстановлен!
+                                </div>
+                                <p>Если вы потеряли приватный ключ:</p>
+                                <ol>
+                                    <li>Сгенерируйте новую пару ключей</li>
+                                    <li>Все данные, зашифрованные старым ключом, станут недоступны</li>
+                                    <li>В будущем обязательно сохраняйте приватные ключи в безопасном месте</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-4 bg-light rounded">
+                    <h4 class="h5">Не нашли ответ на свой вопрос?</h4>
+                    <p class="mb-3">Свяжитесь с нашей службой поддержки:</p>
+                    <a href="mailto:support@rsacrypto.ru" class="btn btn-primary">
+                        <i class="bi bi-envelope me-2"></i>Написать в поддержку
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

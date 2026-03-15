@@ -1,0 +1,141 @@
+<!-- templates/encrypt.html -->
+{% extends "base.html" %}
+
+{% block title %}Шифрование - RSA Криптосистема{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="h4 mb-0">
+                    <i class="bi bi-lock-fill me-2"></i>
+                    Шифрование текста
+                </h2>
+            </div>
+            <div class="card-body p-4">
+                <form id="encryptForm">
+                    <div class="mb-3">
+                        <label for="text" class="form-label">Текст для шифрования</label>
+                        <textarea class="form-control" id="text" name="text" rows="4" required 
+                                  placeholder="Введите текст для шифрования..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="keySelect" class="form-label">Выберите ключ (опционально)</label>
+                        <select class="form-select" id="keySelect" name="key_id">
+                            <option value="">-- Использовать временный ключ --</option>
+                        </select>
+                        <div class="form-text">
+                            Если не выбран ключ, будет сгенерирован временный для этого шифрования
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" id="encryptBtn">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        <span class="btn-text">Зашифровать</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card" id="resultCard" style="display: none;">
+            <div class="card-header bg-success text-white">
+                <h3 class="h5 mb-0">Результат шифрования</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>ID операции:</strong> <span id="operationId"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Зашифрованный текст</label>
+                    <pre id="cipherText" class="bg-light p-3 rounded" style="max-height: 300px; overflow: auto;"></pre>
+                    <button class="btn btn-sm btn-outline-primary mt-2" onclick="copyToClipboard(document.getElementById('cipherText').textContent)">
+                        <i class="bi bi-files me-1"></i>Копировать
+                    </button>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Использованный публичный ключ</label>
+                    <pre id="usedKey" class="bg-light p-3 rounded" style="max-height: 200px; overflow: auto;"></pre>
+                </div>
+                
+                <a href="/history" class="btn btn-outline-primary">
+                    <i class="bi bi-clock-history me-2"></i>Посмотреть историю
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function loadUserKeys() {
+    try {
+        const response = await fetch('/user/dashboard');
+        if (response.ok) {
+            // Здесь должен быть эндпоинт для получения ключей пользователя
+            // Пока добавим демо-данные
+            const keySelect = document.getElementById('keySelect');
+            keySelect.innerHTML = '<option value="">-- Использовать временный ключ --</option>';
+            
+            // Пример добавления ключей (замените на реальные данные)
+            // keys.forEach(key => {
+            //     keySelect.innerHTML += `<option value="${key.id}">Ключ ID: ${key.id} (${new Date(key.created_at).toLocaleDateString()})</option>`;
+            // });
+        }
+    } catch (error) {
+        console.error('Load keys error:', error);
+    }
+}
+
+document.getElementById('encryptForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const encryptBtn = document.getElementById('encryptBtn');
+    const spinner = encryptBtn.querySelector('.spinner-border');
+    const btnText = encryptBtn.querySelector('.btn-text');
+    const resultCard = document.getElementById('resultCard');
+    
+    spinner.classList.remove('d-none');
+    btnText.textContent = 'Шифрование...';
+    encryptBtn.disabled = true;
+    resultCard.style.display = 'none';
+    
+    const formData = new FormData();
+    formData.append('text', document.getElementById('text').value);
+    formData.append('key_id', document.getElementById('keySelect').value);
+    
+    try {
+        const response = await fetch('/RSA/api/encrypt', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const [operationId, cipher, publicKey] = await response.json();
+            
+            document.getElementById('operationId').textContent = operationId;
+            document.getElementById('cipherText').textContent = JSON.stringify(cipher, null, 2);
+            document.getElementById('usedKey').textContent = JSON.stringify(publicKey, null, 2);
+            
+            resultCard.style.display = 'block';
+            showAlert('Текст успешно зашифрован!', 'success');
+        } else {
+            const error = await response.json();
+            showAlert(error.detail || 'Ошибка шифрования', 'danger');
+        }
+    } catch (error) {
+        console.error('Encryption error:', error);
+        showAlert('Ошибка соединения с сервером', 'danger');
+    } finally {
+        spinner.classList.add('d-none');
+        btnText.textContent = 'Зашифровать';
+        encryptBtn.disabled = false;
+    }
+});
+
+// Загружаем ключи при загрузке страницы
+document.addEventListener('DOMContentLoaded', loadUserKeys);
+</script>
+{% endblock %}

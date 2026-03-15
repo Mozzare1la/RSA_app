@@ -1,0 +1,413 @@
+<!-- templates/admin.html -->
+{% extends "base.html" %}
+
+{% block title %}Админ-панель - RSA Криптосистема{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Статистика -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="display-4" id="totalUsers">0</h3>
+                        <p class="text-muted mb-0">Всего пользователей</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="display-4" id="totalKeys">0</h3>
+                        <p class="text-muted mb-0">Всего ключей</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="display-4" id="totalOperations">0</h3>
+                        <p class="text-muted mb-0">Операций</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="display-4" id="activeToday">0</h3>
+                        <p class="text-muted mb-0">Активных сегодня</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Табы -->
+        <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab">
+                    <i class="bi bi-people me-2"></i>Пользователи
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" type="button" role="tab">
+                    <i class="bi bi-activity me-2"></i>Активность
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="keys-tab" data-bs-toggle="tab" data-bs-target="#keys" type="button" role="tab">
+                    <i class="bi bi-key me-2"></i>Ключи
+                </button>
+            </li>
+        </ul>
+        
+        <!-- Содержимое табов -->
+        <div class="tab-content" id="adminTabContent">
+            <!-- Таб пользователей -->
+            <div class="tab-pane fade show active" id="users" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="h5 mb-0">Управление пользователями</h3>
+                        <button class="btn btn-sm btn-primary" onclick="createUser()">
+                            <i class="bi bi-person-plus me-2"></i>Создать пользователя
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Логин</th>
+                                        <th>Роль</th>
+                                        <th>Дата регистрации</th>
+                                        <th>Кол-во ключей</th>
+                                        <th>Кол-во операций</th>
+                                        <th>Статус</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody">
+                                    <tr>
+                                        <td colspan="8" class="text-center">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Загрузка...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Таб активности -->
+            <div class="tab-pane fade" id="activity" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="h5 mb-0">Активность пользователей</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Пользователь</th>
+                                        <th>Тип</th>
+                                        <th>Детали</th>
+                                        <th>IP адрес</th>
+                                        <th>Дата и время</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="activityTableBody">
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Загрузка...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Таб ключей -->
+            <div class="tab-pane fade" id="keys" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="h5 mb-0">Все ключи в системе</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Пользователь</th>
+                                        <th>Дата создания</th>
+                                        <th>Публичный ключ</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="keysTableBody">
+                                    <tr>
+                                        <td colspan="5" class="text-center">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Загрузка...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно создания пользователя -->
+<div class="modal fade" id="createUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Создание пользователя</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createUserForm">
+                    <div class="mb-3">
+                        <label for="newLogin" class="form-label">Логин</label>
+                        <input type="text" class="form-control" id="newLogin" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">Пароль</label>
+                        <input type="password" class="form-control" id="newPassword" required minlength="6">
+                    </div>
+                    <div class="mb-3">
+                        <label for="newRole" class="form-label">Роль</label>
+                        <select class="form-select" id="newRole">
+                            <option value="user">Пользователь</option>
+                            <option value="admin">Администратор</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" onclick="saveNewUser()">Создать</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function loadAdminData() {
+    try {
+        // Загружаем статистику
+        const statsResponse = await fetch('/admin/');
+        if (statsResponse.ok) {
+            const stats = await statsResponse.json();
+            document.getElementById('totalUsers').textContent = stats.stats?.total_users || 0;
+            document.getElementById('totalKeys').textContent = stats.stats?.total_keys || 0;
+            document.getElementById('totalOperations').textContent = stats.stats?.total_operations || 0;
+            document.getElementById('activeToday').textContent = stats.stats?.active_today || 0;
+        }
+        
+        // Загружаем пользователей
+        loadUsers();
+        
+        // Загружаем активность
+        loadActivity();
+        
+        // Загружаем ключи
+        loadKeys();
+        
+    } catch (error) {
+        console.error('Admin load error:', error);
+    }
+}
+
+async function loadUsers() {
+    try {
+        const response = await fetch('/admin/users');
+        if (response.ok) {
+            const data = await response.json();
+            const users = data.users || [];
+            
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.login}</td>
+                    <td>
+                        <span class="badge ${user.role === 'admin' ? 'bg-danger' : 'bg-primary'}">
+                            ${user.role === 'admin' ? 'Админ' : 'Пользователь'}
+                        </span>
+                    </td>
+                    <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                    <td>${user.keys_count || 0}</td>
+                    <td>${user.operations_count || 0}</td>
+                    <td>
+                        <span class="badge ${user.is_active ? 'bg-success' : 'bg-secondary'}">
+                            ${user.is_active ? 'Активен' : 'Неактивен'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${user.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Load users error:', error);
+    }
+}
+
+async function loadActivity() {
+    try {
+        const response = await fetch('/admin/activity');
+        if (response.ok) {
+            const data = await response.json();
+            const activities = data.activities || [];
+            
+            const tbody = document.getElementById('activityTableBody');
+            tbody.innerHTML = activities.map(act => `
+                <tr>
+                    <td>${act.id}</td>
+                    <td>${act.user_login || 'Неизвестно'}</td>
+                    <td>
+                        <span class="badge bg-info">${act.activity_type}</span>
+                    </td>
+                    <td>${act.details || '—'}</td>
+                    <td>${act.ip_address || '—'}</td>
+                    <td>${new Date(act.created_at).toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Load activity error:', error);
+    }
+}
+
+async function loadKeys() {
+    try {
+        const response = await fetch('/admin/keys'); // Нужен соответствующий эндпоинт
+        if (response.ok) {
+            const data = await response.json();
+            const keys = data.keys || [];
+            
+            const tbody = document.getElementById('keysTableBody');
+            if (keys.length > 0) {
+                tbody.innerHTML = keys.map(key => `
+                    <tr>
+                        <td>${key.id}</td>
+                        <td>${key.user_login}</td>
+                        <td>${new Date(key.created_at).toLocaleString()}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-info" onclick="viewPublicKey('${key.public_key}')">
+                                <i class="bi bi-eye"></i> Показать
+                            </button>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteKey(${key.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Нет ключей</td></tr>';
+            }
+        }
+    } catch (error) {
+        console.error('Load keys error:', error);
+    }
+}
+
+function createUser() {
+    new bootstrap.Modal(document.getElementById('createUserModal')).show();
+}
+
+async function saveNewUser() {
+    const login = document.getElementById('newLogin').value;
+    const password = document.getElementById('newPassword').value;
+    const role = document.getElementById('newRole').value;
+    
+    if (!login || !password) {
+        showAlert('Заполните все поля', 'danger');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/user/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ login, password, role })
+        });
+        
+        if (response.ok) {
+            showAlert('Пользователь создан', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('createUserModal')).hide();
+            loadUsers();
+        } else {
+            const error = await response.json();
+            showAlert(error.detail || 'Ошибка создания', 'danger');
+        }
+    } catch (error) {
+        console.error('Create user error:', error);
+        showAlert('Ошибка соединения с сервером', 'danger');
+    }
+}
+
+async function deleteUser(userId) {
+    if (!confirm('Вы уверены, что хотите удалить этого пользователя?')) return;
+    
+    try {
+        const response = await fetch(`/admin/users/${userId}`, { method: 'DELETE' });
+        if (response.ok) {
+            showAlert('Пользователь удален', 'success');
+            loadUsers();
+        } else {
+            showAlert('Ошибка удаления', 'danger');
+        }
+    } catch (error) {
+        console.error('Delete user error:', error);
+        showAlert('Ошибка соединения с сервером', 'danger');
+    }
+}
+
+function viewPublicKey(key) {
+    showAlert(key, 'info');
+}
+
+async function deleteKey(keyId) {
+    if (!confirm('Вы уверены, что хотите удалить этот ключ?')) return;
+    
+    try {
+        const response = await fetch(`/admin/keys/${keyId}`, { method: 'DELETE' });
+        if (response.ok) {
+            showAlert('Ключ удален', 'success');
+            loadKeys();
+        } else {
+            showAlert('Ошибка удаления', 'danger');
+        }
+    } catch (error) {
+        console.error('Delete key error:', error);
+        showAlert('Ошибка соединения с сервером', 'danger');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadAdminData);
+</script>
+{% endblock %}

@@ -1,17 +1,28 @@
 from fastapi import APIRouter, Depends, Request, HTTPException, status
 from sqlalchemy.orm import Session
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import RedirectResponse, JSONResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
 from app.database import get_db
 from app.crud import get_user_by_login, create_user, create_user_activity
 from app.logic import verify_password
 from schemas.schemas import UserCreate, LoginRequest
 import logging
 from app.logic import get_client_ip, access_security, get_current_user_from_token
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+templates_dir = os.path.join(os.path.dirname(current_dir), "templates")
+templates = Jinja2Templates(directory=templates_dir)
 
 router = APIRouter(prefix="/user", tags=["user"])
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+@router.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    """Страница входа в систему"""
+    return templates.TemplateResponse("login.html", {"request": request})
 
 @router.post("/login")
 async def login_page(
@@ -53,6 +64,11 @@ async def login_page(
     return response
 
 # Страница регистрации
+@router.get("/register", response_class=HTMLResponse)
+async def register_page(request: Request):
+    """Страница регистрации"""
+    return templates.TemplateResponse("register.html", {"request": request})
+
 @router.post("/register")
 async def register_page(request: Request, user_data: UserCreate):
     existing_user = get_user_by_login(user_data.login())

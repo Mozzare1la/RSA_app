@@ -1,0 +1,139 @@
+<!-- templates/decrypt.html -->
+{% extends "base.html" %}
+
+{% block title %}Расшифрование - RSA Криптосистема{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="h4 mb-0">
+                    <i class="bi bi-unlock-fill me-2"></i>
+                    Расшифрование текста
+                </h2>
+            </div>
+            <div class="card-body p-4">
+                <form id="decryptForm">
+                    <div class="mb-3">
+                        <label for="cipher" class="form-label">Зашифрованный текст (в формате JSON)</label>
+                        <textarea class="form-control" id="cipher" name="cipher" rows="4" required 
+                                  placeholder='[12345, 67890, ...]'></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="keySelect" class="form-label">Выберите приватный ключ</label>
+                        <select class="form-select" id="keySelect" name="key_id" required>
+                            <option value="">-- Выберите ключ --</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" id="decryptBtn">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        <span class="btn-text">Расшифровать</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card" id="resultCard" style="display: none;">
+            <div class="card-header bg-success text-white">
+                <h3 class="h5 mb-0">Результат расшифрования</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>ID операции:</strong> <span id="operationId"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Расшифрованный текст</label>
+                    <div class="bg-light p-3 rounded" id="decryptedText"></div>
+                    <button class="btn btn-sm btn-outline-primary mt-2" onclick="copyToClipboard(document.getElementById('decryptedText').textContent)">
+                        <i class="bi bi-files me-1"></i>Копировать
+                    </button>
+                </div>
+                
+                <a href="/history" class="btn btn-outline-primary">
+                    <i class="bi bi-clock-history me-2"></i>Посмотреть историю
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function loadUserKeys() {
+    try {
+        const response = await fetch('/user/dashboard');
+        if (response.ok) {
+            // Здесь должен быть эндпоинт для получения ключей пользователя
+            const keySelect = document.getElementById('keySelect');
+            keySelect.innerHTML = '<option value="">-- Выберите ключ --</option>';
+            
+            // Пример добавления ключей (замените на реальные данные)
+            // keys.forEach(key => {
+            //     keySelect.innerHTML += `<option value="${key.id}">Ключ ID: ${key.id} (${new Date(key.created_at).toLocaleDateString()})</option>`;
+            // });
+        }
+    } catch (error) {
+        console.error('Load keys error:', error);
+    }
+}
+
+document.getElementById('decryptForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const decryptBtn = document.getElementById('decryptBtn');
+    const spinner = decryptBtn.querySelector('.spinner-border');
+    const btnText = decryptBtn.querySelector('.btn-text');
+    const resultCard = document.getElementById('resultCard');
+    
+    // Проверяем валидность JSON
+    try {
+        JSON.parse(document.getElementById('cipher').value);
+    } catch (e) {
+        showAlert('Неверный формат JSON', 'danger');
+        return;
+    }
+    
+    spinner.classList.remove('d-none');
+    btnText.textContent = 'Расшифрование...';
+    decryptBtn.disabled = true;
+    resultCard.style.display = 'none';
+    
+    const formData = new FormData();
+    formData.append('cipher', document.getElementById('cipher').value);
+    formData.append('key_id', document.getElementById('keySelect').value);
+    
+    try {
+        const response = await fetch('/RSA/api/decrypt', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const [operationId, decryptedText] = await response.json();
+            
+            document.getElementById('operationId').textContent = operationId;
+            document.getElementById('decryptedText').textContent = decryptedText;
+            
+            resultCard.style.display = 'block';
+            showAlert('Текст успешно расшифрован!', 'success');
+        } else {
+            const error = await response.json();
+            showAlert(error.detail || 'Ошибка расшифрования', 'danger');
+        }
+    } catch (error) {
+        console.error('Decryption error:', error);
+        showAlert('Ошибка соединения с сервером', 'danger');
+    } finally {
+        spinner.classList.add('d-none');
+        btnText.textContent = 'Расшифровать';
+        decryptBtn.disabled = false;
+    }
+});
+
+// Загружаем ключи при загрузке страницы
+document.addEventListener('DOMContentLoaded', loadUserKeys);
+</script>
+{% endblock %}

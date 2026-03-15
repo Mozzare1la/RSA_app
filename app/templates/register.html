@@ -1,0 +1,139 @@
+<!-- templates/register.html -->
+{% extends "base.html" %}
+
+{% block title %}Регистрация - RSA Криптосистема{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 col-lg-5 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="h4 mb-0">
+                    <i class="bi bi-person-plus me-2"></i>
+                    Регистрация
+                </h2>
+            </div>
+            <div class="card-body p-4">
+                <form id="registerForm">
+                    <div class="mb-3">
+                        <label for="login" class="form-label">Логин</label>
+                        <input type="text" class="form-control" id="login" name="login" required 
+                               placeholder="Придумайте логин" minlength="3" maxlength="50">
+                        <div class="form-text">От 3 до 50 символов</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Пароль</label>
+                        <input type="password" class="form-control" id="password" name="password" required 
+                               placeholder="Придумайте пароль" minlength="6">
+                        <div class="form-text">Минимум 6 символов</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Подтверждение пароля</label>
+                        <input type="password" class="form-control" id="confirmPassword" required 
+                               placeholder="Повторите пароль">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="agree" required>
+                        <label class="form-check-label" for="agree">
+                            Я согласен с <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">условиями использования</a>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" id="submitBtn">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        <span class="btn-text">Зарегистрироваться</span>
+                    </button>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="mb-0">Уже есть аккаунт? <a href="/login">Войти</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно с условиями -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Условия использования</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Регистрируясь в системе, вы соглашаетесь с тем, что:</p>
+                <ul>
+                    <li>Вы несете ответственность за сохранность своих ключей</li>
+                    <li>Система не хранит ваши приватные ключи в открытом виде</li>
+                    <li>Вы обязуетесь не использовать систему для незаконных целей</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Понятно</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (password !== confirmPassword) {
+        showAlert('Пароли не совпадают', 'danger');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showAlert('Пароль должен быть не менее 6 символов', 'danger');
+        return;
+    }
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const spinner = submitBtn.querySelector('.spinner-border');
+    const btnText = submitBtn.querySelector('.btn-text');
+    
+    spinner.classList.remove('d-none');
+    btnText.textContent = 'Регистрация...';
+    submitBtn.disabled = true;
+    
+    const userData = {
+        login: document.getElementById('login').value,
+        password: password,
+        role: 'user'
+    };
+    
+    try {
+        const response = await fetch('/user/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        });
+        
+        if (response.ok) {
+            showAlert('Регистрация успешна! Перенаправление на страницу входа...', 'success');
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
+        } else {
+            const error = await response.json();
+            showAlert(error.detail || 'Ошибка регистрации', 'danger');
+        }
+    } catch (error) {
+        console.error('Registration error:', error);
+        showAlert('Ошибка соединения с сервером', 'danger');
+    } finally {
+        spinner.classList.add('d-none');
+        btnText.textContent = 'Зарегистрироваться';
+        submitBtn.disabled = false;
+    }
+});
+</script>
+{% endblock %}

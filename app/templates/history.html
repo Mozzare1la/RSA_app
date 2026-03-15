@@ -1,0 +1,249 @@
+<!-- templates/history.html -->
+{% extends "base.html" %}
+
+{% block title %}История операций - RSA Криптосистема{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="h4 mb-0">
+                    <i class="bi bi-clock-history me-2"></i>
+                    История операций
+                </h2>
+                <div>
+                    <select class="form-select form-select-sm" id="filterType" style="width: auto; display: inline-block;">
+                        <option value="all">Все операции</option>
+                        <option value="encrypt">Только шифрование</option>
+                        <option value="decrypt">Только расшифрование</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="operationsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Тип</th>
+                                <th>Дата и время</th>
+                                <th>Входные данные</th>
+                                <th>Результат</th>
+                                <th>ID ключа</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="operationsTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Загрузка...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Пагинация -->
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center" id="pagination">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1">Предыдущая</a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Следующая</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно просмотра деталей -->
+<div class="modal fade" id="operationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Детали операции</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Входные данные:</label>
+                    <pre id="modalInput" class="bg-light p-3 rounded" style="max-height: 200px; overflow: auto;"></pre>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Результат:</label>
+                    <pre id="modalOutput" class="bg-light p-3 rounded" style="max-height: 200px; overflow: auto;"></pre>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>ID операции:</strong> <span id="modalId"></span></p>
+                        <p><strong>Тип:</strong> <span id="modalType"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Дата:</strong> <span id="modalDate"></span></p>
+                        <p><strong>ID ключа:</strong> <span id="modalKeyId"></span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentPage = 1;
+let totalPages = 1;
+
+async function loadOperations(page = 1, filter = 'all') {
+    const tbody = document.getElementById('operationsTableBody');
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Загрузка...</span></div></td></tr>';
+    
+    try {
+        const response = await fetch('/RSA/history');
+        if (response.ok) {
+            const data = await response.json();
+            let operations = data.operations || [];
+            
+            // Применяем фильтр
+            if (filter !== 'all') {
+                operations = operations.filter(op => op.operation_type === filter);
+            }
+            
+            // Пагинация (по 10 элементов на страницу)
+            const itemsPerPage = 10;
+            totalPages = Math.ceil(operations.length / itemsPerPage);
+            const start = (page - 1) * itemsPerPage;
+            const paginatedOps = operations.slice(start, start + itemsPerPage);
+            
+            if (paginatedOps.length > 0) {
+                tbody.innerHTML = paginatedOps.map(op => `
+                    <tr>
+                        <td>${op.id}</td>
+                        <td>
+                            <span class="badge ${op.operation_type === 'encrypt' ? 'bg-success' : 'bg-danger'}">
+                                ${op.operation_type === 'encrypt' ? 'Шифрование' : 'Расшифрование'}
+                            </span>
+                        </td>
+                        <td>${new Date(op.created_at).toLocaleString()}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-info" onclick="showInput('${op.input_text}')">
+                                <i class="bi bi-eye"></i> Показать
+                            </button>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-info" onclick="showOutput('${op.output_text}')">
+                                <i class="bi bi-eye"></i> Показать
+                            </button>
+                        </td>
+                        <td>${op.key_id || '—'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="showOperationDetails(${op.id}, '${op.operation_type}', '${op.input_text}', '${op.output_text}', '${op.created_at}', ${op.key_id})">
+                                <i class="bi bi-info-circle"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Нет операций</td></tr>';
+            }
+            
+            updatePagination();
+        }
+    } catch (error) {
+        console.error('Load operations error:', error);
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Ошибка загрузки данных</td></tr>';
+    }
+}
+
+function updatePagination() {
+    const pagination = document.getElementById('pagination');
+    let html = `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Предыдущая</a>
+        </li>
+    `;
+    
+    for (let i = 1; i <= totalPages; i++) {
+        html += `
+            <li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link" href="#" onclick="changePage(${i})">${i}</a>
+            </li>
+        `;
+    }
+    
+    html += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Следующая</a>
+        </li>
+    `;
+    
+    pagination.innerHTML = html;
+}
+
+function changePage(page) {
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    const filter = document.getElementById('filterType').value;
+    loadOperations(currentPage, filter);
+}
+
+function showInput(input) {
+    try {
+        const parsed = JSON.parse(input);
+        showAlert(JSON.stringify(parsed, null, 2), 'info');
+    } catch {
+        showAlert(input, 'info');
+    }
+}
+
+function showOutput(output) {
+    try {
+        const parsed = JSON.parse(output);
+        showAlert(JSON.stringify(parsed, null, 2), 'info');
+    } catch {
+        showAlert(output, 'info');
+    }
+}
+
+function showOperationDetails(id, type, input, output, date, keyId) {
+    document.getElementById('modalId').textContent = id;
+    document.getElementById('modalType').textContent = type === 'encrypt' ? 'Шифрование' : 'Расшифрование';
+    document.getElementById('modalDate').textContent = new Date(date).toLocaleString();
+    document.getElementById('modalKeyId').textContent = keyId || 'Не указан';
+    
+    try {
+        const parsedInput = JSON.parse(input);
+        document.getElementById('modalInput').textContent = JSON.stringify(parsedInput, null, 2);
+    } catch {
+        document.getElementById('modalInput').textContent = input;
+    }
+    
+    try {
+        const parsedOutput = JSON.parse(output);
+        document.getElementById('modalOutput').textContent = JSON.stringify(parsedOutput, null, 2);
+    } catch {
+        document.getElementById('modalOutput').textContent = output;
+    }
+    
+    new bootstrap.Modal(document.getElementById('operationModal')).show();
+}
+
+document.getElementById('filterType').addEventListener('change', (e) => {
+    currentPage = 1;
+    loadOperations(currentPage, e.target.value);
+});
+
+// Загружаем операции при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => loadOperations());
+</script>
+{% endblock %}

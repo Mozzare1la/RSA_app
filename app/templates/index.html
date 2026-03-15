@@ -1,0 +1,89 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block title %}Главная - RSA Криптосистема{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto text-center">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="h3 mb-0">
+                    <i class="bi bi-shield-lock-fill me-2"></i>
+                    Добро пожаловать в RSA Криптосистему
+                </h1>
+            </div>
+            <div class="card-body p-5">
+                <div class="mb-4">
+                    <img src="https://img.icons8.com/color/96/000000/encryption.png" alt="RSA Encryption" class="mb-3">
+                    <h2 class="h4 mb-3">Безопасное шифрование данных</h2>
+                    <p class="text-muted">
+                        Наша система использует криптографический алгоритм RSA для обеспечения 
+                        безопасности ваших данных. Генерируйте ключи, шифруйте и расшифровывайте 
+                        сообщения с максимальной защитой.
+                    </p>
+                </div>
+                
+                <div class="row g-4 mt-4">
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-key-fill text-primary" style="font-size: 2.5rem;"></i>
+                                <h3 class="h5 mt-3">Генерация ключей</h3>
+                                <p class="small text-muted">Создавайте пары RSA ключей для шифрования</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-lock-fill text-success" style="font-size: 2.5rem;"></i>
+                                <h3 class="h5 mt-3">Шифрование</h3>
+                                <p class="small text-muted">Защищайте свои сообщения от несанкционированного доступа</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-unlock-fill text-danger" style="font-size: 2.5rem;"></i>
+                                <h3 class="h5 mt-3">Расшифрование</h3>
+                                <p class="small text-muted">Восстанавливайте исходный текст с помощью приватного ключа</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-5">
+                    <h3 class="h5 mb-3">Основные возможности:</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled text-start">
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Регистрация и аутентификация</li>
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Генерация RSA ключей</li>
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Шифрование текста</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled text-start">
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Расшифрование текста</li>
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i>История операций</li>
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Админ-панель для управления</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-5">
+                    <a href="/register" class="btn btn-primary btn-lg me-2">
+                        <i class="bi bi-person-plus me-2"></i>Начать работу
+                    </a>
+                    <a href="/about" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-info-circle me-2"></i>Узнать больше
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 import logging
 import os
 
-from database import get_db, engine, Base
+from database import get_db
 import crud
 import schemas.schemas as schemas
 from endpoints.admin_endpoint import router as admin_router
@@ -18,11 +18,6 @@ from endpoints.user_endpoint import router as user_router
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Создаем таблицы в базе данных - УДАЛЯЕМ СТАРЫЕ И СОЗДАЕМ НОВЫЕ
-Base.metadata.drop_all(bind=engine)  # Удаляем старые таблицы
-Base.metadata.create_all(bind=engine)  # Создаем новые с обновленной схемой
-logger.info("✅ Таблицы базы данных пересозданы с новой схемой")
 
 # Контекстный менеджер для lifespan
 @asynccontextmanager
